@@ -170,29 +170,8 @@ class CreditsScreen extends ConsumerWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            switchInCurve: Curves.easeOut,
-            switchOutCurve: Curves.easeIn,
-            transitionBuilder: (child, animation) {
-              // Slide up animation
-              return SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0, 0.1), // Start from below
-                  end: Offset.zero,
-                ).animate(CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeOut,
-                )),
-                child: FadeTransition(
-                  opacity: animation,
-                  child: child,
-                ),
-              );
-            },
-            child: Column(
-              key: ValueKey<int>(state.currentStep), // Triggers animation on step change
-              children: [
+          child: Column(
+            children: [
                 // Step 1
                 _buildStep(
                   stepNumber: 1,
@@ -222,7 +201,6 @@ class CreditsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-          ),
         ),
       ),
     );
@@ -293,13 +271,21 @@ class CreditsScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                // Content
-                if (content != null) ...[
-                  const SizedBox(height: 12),
-                  content,
-                  const SizedBox(height: 16),
-                ] else
-                  const SizedBox(height: 40), // More space for collapsed steps
+                // Content with collapse animation
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  child: content != null
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 12),
+                            content,
+                            const SizedBox(height: 16),
+                          ],
+                        )
+                      : const SizedBox(height: 20), // Collapsed state
+                ),
               ],
             ),
           ),

@@ -132,60 +132,69 @@ class _Step1InputWidgetState extends ConsumerState<Step1InputWidget> {
             ),
           ),
           const SizedBox(height: 8),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.transparent,
-              border: Border.all(color: const Color(0xFF3a3a4a)),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: DropdownButtonFormField<String>(
-              value: options.language,
-              isDense: true,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                border: InputBorder.none,
-                filled: false,
-                prefixIcon: Padding(
-                  padding: EdgeInsets.only(left: 12, right: 8),
-                  child: Text('🇲🇲', style: TextStyle(fontSize: 18)),
-                ),
-                prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
-              ),
-              dropdownColor: const Color(0xFF1a1a2e),
-              style: const TextStyle(color: Colors.white, fontSize: 14),
-              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white54, size: 20),
-              items: const [
-                DropdownMenuItem(
-                  value: 'my', 
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('🇲🇲 ', style: TextStyle(fontSize: 18)),
-                      Text('မြန်မာ (Burmese)', style: TextStyle(color: Colors.white, fontSize: 14)),
-                    ],
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    border: Border.all(color: const Color(0xFF3a3a4a)),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-                DropdownMenuItem(
-                  value: 'en', 
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('🇬🇧 ', style: TextStyle(fontSize: 18)),
+                  child: DropdownButtonFormField<String>(
+                    value: options.language,
+                    isDense: true,
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                      border: InputBorder.none,
+                      filled: false,
+                      prefixIcon: Padding(
+                        padding: EdgeInsets.only(left: 12, right: 8),
+                        child: Text('🇲🇲', style: TextStyle(fontSize: 18)),
+                      ),
+                      prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
+                    ),
+                    dropdownColor: const Color(0xFF1a1a2e),
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                    icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white54, size: 20),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'my', 
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('🇲🇲 ', style: TextStyle(fontSize: 18)),
+                            Text('မြန်မာ (Burmese)', style: TextStyle(color: Colors.white, fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                      DropdownMenuItem(
+                        value: 'en', 
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('🇬🇧 ', style: TextStyle(fontSize: 18)),
+                            Text('English', style: TextStyle(color: Colors.white, fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    ],
+                    selectedItemBuilder: (context) => const [
+                      Text('မြန်မာ (Burmese)', style: TextStyle(color: Colors.white, fontSize: 14)),
                       Text('English', style: TextStyle(color: Colors.white, fontSize: 14)),
                     ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        ref.read(videoCreationProvider.notifier).setLanguage(value);
+                      }
+                    },
                   ),
                 ),
-              ],
-              selectedItemBuilder: (context) => const [
-                Text('မြန်မာ (Burmese)', style: TextStyle(color: Colors.white, fontSize: 14)),
-                Text('English', style: TextStyle(color: Colors.white, fontSize: 14)),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  ref.read(videoCreationProvider.notifier).setLanguage(value);
-                }
-              },
-            ),
+              ),
+              const SizedBox(width: 8),
+              // Spacer to match paste button width
+              const SizedBox(width: 48, height: 48),
+            ],
           ),
           const SizedBox(height: 8),
           Text(
