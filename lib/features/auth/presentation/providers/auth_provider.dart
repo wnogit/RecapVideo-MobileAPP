@@ -26,12 +26,14 @@ class AuthState {
   final User? user;
   final String? token;
   final bool isLoading;
+  final bool isInitialized; // NEW: Auth check ပြီးပြီလား
   final ApiError? error;
 
   const AuthState({
     this.user,
     this.token,
     this.isLoading = false,
+    this.isInitialized = false, // Default: မပြီးသေး
     this.error,
   });
 
@@ -39,18 +41,22 @@ class AuthState {
     User? user,
     String? token,
     bool? isLoading,
+    bool? isInitialized,
     ApiError? error,
     bool clearError = false,
+    bool clearUser = false,
   }) {
     return AuthState(
-      user: user ?? this.user,
-      token: token ?? this.token,
+      user: clearUser ? null : (user ?? this.user),
+      token: clearUser ? null : (token ?? this.token),
       isLoading: isLoading ?? this.isLoading,
+      isInitialized: isInitialized ?? this.isInitialized,
       error: clearError ? null : (error ?? this.error),
     );
   }
 
-  bool get isAuthenticated => user != null && token != null;
+  // isAuthenticated: initialize ပြီးမှသာ စစ်မယ်
+  bool get isAuthenticated => isInitialized && user != null && token != null;
 }
 
 /// Auth State Notifier
@@ -83,19 +89,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
           user: response.user,
           token: token,
           isLoading: false,
+          isInitialized: true, // Auth check ပြီးပြီ
         );
       } else {
-        state = state.copyWith(isLoading: false);
+        // Token မရှိ - but initialized ပြီ
+        state = state.copyWith(isLoading: false, isInitialized: true);
       }
     } on ApiError catch (e) {
       // Only clear if 401 Unauthorized
       if (e.statusCode == 401) {
         await _tokenStorage.clearAll();
       }
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(isLoading: false, isInitialized: true);
     } catch (e) {
-      // Network errors etc - keep token
-      state = state.copyWith(isLoading: false);
+      // Network errors etc - still mark as initialized
+      state = state.copyWith(isLoading: false, isInitialized: true);
     }
   }
 
@@ -123,6 +131,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         user: response.user,
         token: response.accessToken,
         isLoading: false,
+        isInitialized: true, // Login ပြီးရင် initialized ပြီ
       );
     } on ApiError catch (e) {
       state = state.copyWith(
@@ -206,7 +215,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> logout() async {
     await _authRepository.logout();
     await _tokenStorage.clearAll();
-    state = const AuthState();
+    // Logout ပြီးရင် user clear, but still initialized
+    state = const AuthState(isInitialized: true);
   }
 
   /// Clear error
@@ -224,15 +234,24 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
 });
 
 /// Auth Change Notifier - Router refreshListenable အတွက်
-/// isAuthenticated ပြောင်းမှသာ notify လုပ်မယ် (loading state ပြောင်းရင် ignore)
+/// isInitialized + isAuthenticated ပြောင်းမှသာ notify လုပ်မယ်
 class AuthChangeNotifier extends ChangeNotifier {
   bool _wasAuthenticated = false;
+  bool _wasInitialized = false;
 
   void update(AuthState state) {
-    // isAuthenticated ပြောင်းမှသာ notify လုပ်မယ်
-    // loading true ဖြစ်နေရင် ignore (form rebuild မဖြစ်အောင်)
+    // Loading state ignore
     if (state.isLoading) return;
     
+    // isInitialized ပြောင်းရင် notify (first time init)
+    if (!_wasInitialized && state.isInitialized) {
+      _wasInitialized = true;
+      _wasAuthenticated = state.isAuthenticated;
+      notifyListeners();
+      return;
+    }
+    
+    // isAuthenticated ပြောင်းရင် notify (login/logout)
     final isNowAuthenticated = state.isAuthenticated;
     if (_wasAuthenticated != isNowAuthenticated) {
       _wasAuthenticated = isNowAuthenticated;

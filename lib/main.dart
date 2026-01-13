@@ -158,9 +158,8 @@ class _RecapVideoAppState extends ConsumerState<RecapVideoApp> {
     );
   }
 
-  // Logo Animation Widget - Lottie or Fallback
+  // Logo Animation Widget - Actual Logo or Fallback
   Widget _buildLogoAnimation() {
-    // Try to load Lottie animation, fallback to static logo
     return Container(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -177,18 +176,21 @@ class _RecapVideoAppState extends ConsumerState<RecapVideoApp> {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(30),
-      child: const Icon(
-        Icons.video_library_rounded,
-        size: 80,
-        color: Colors.white,
+      padding: const EdgeInsets.all(20),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Image.asset(
+          'assets/images/logo.png',
+          width: 100,
+          height: 100,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => const Icon(
+            Icons.video_library_rounded,
+            size: 80,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
-    // TODO: When Lottie animation file is ready, replace above with:
-    // return Lottie.asset(
-    //   'assets/animations/splash_logo.json',
-    //   repeat: true,
-    //   animate: true,
-    // );
   }
 }

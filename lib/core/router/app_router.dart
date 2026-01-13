@@ -47,6 +47,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       // ref.read သုံးမယ် - rebuild မဖြစ်အောင်
       final authState = ref.read(authProvider);
+      
+      // Auth initialize မပြီးသေးရင် redirect မလုပ်ဘူး
+      // (Splash screen ပြနေဆဲ)
+      if (!authState.isInitialized) {
+        return null;
+      }
+      
       final isAuthenticated = authState.isAuthenticated;
       final isAuthRoute = state.matchedLocation == '/login' || 
                           state.matchedLocation == '/signup';

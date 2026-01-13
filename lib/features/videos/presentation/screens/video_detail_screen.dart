@@ -261,7 +261,7 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
             ),
           ),
 
-                  // Video Info
+                  // Video Info Section
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -281,41 +281,44 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
 
                           // Status badge
                           _buildStatusBadge(widget.status),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
 
-                          // Action buttons
-                          if (isReady) ...[
-                            _buildActionButton(
-                              context,
-                              icon: Icons.download,
-                              label: 'Download Video',
-                              color: AppColors.primary,
-                              onTap: () {
-                                // TODO: Download video
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Downloading...')),
-                                );
-                              },
+                          // Video Info Card (Primary Content)
+                          if (isReady) _buildVideoInfoCard(),
+                          
+                          const SizedBox(height: 16),
+
+                          // Compact Action Buttons (Download + Share)
+                          if (isReady)
+                            Row(
+                              children: [
+                                // Download Button (Compact)
+                                Expanded(
+                                  child: _buildCompactButton(
+                                    icon: Icons.download,
+                                    label: 'Download',
+                                    color: AppColors.primary,
+                                    onTap: () {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Downloading...')),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                // Share Button (Compact)
+                                Expanded(
+                                  child: _buildCompactButton(
+                                    icon: Icons.share,
+                                    label: 'Share',
+                                    color: Colors.blue,
+                                    onTap: () {
+                                      // TODO: Share video
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 12),
-                            _buildActionButton(
-                              context,
-                              icon: Icons.share,
-                              label: 'Share Video',
-                              color: Colors.blue,
-                              onTap: () {
-                                // TODO: Share video
-                              },
-                            ),
-                          ],
-                          const SizedBox(height: 12),
-                          _buildActionButton(
-                            context,
-                            icon: Icons.delete_outline,
-                            label: 'Delete Video',
-                            color: Colors.red,
-                            onTap: () => _confirmDelete(context),
-                          ),
                         ],
                       ),
                     ),
@@ -374,6 +377,136 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
                   const SizedBox(width: 6),
                   Text(label, style: TextStyle(color: color, fontSize: 13)),
                 ],
+              ),
+            );
+          }
+
+          /// Video Info Card - Displays metadata
+          Widget _buildVideoInfoCard() {
+            // Get duration from video controller
+            final duration = _controller?.value.duration ?? Duration.zero;
+            final durationStr = _formatDuration(duration);
+            
+            // TODO: Get these from actual video data API
+            const fileSize = '12.5 MB'; // Placeholder
+            final createdDate = DateTime.now().toString().split(' ')[0];
+            const voice = 'Myanmar Female';
+            const style = 'Professional';
+            
+            return Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1a1a2e),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white.withAlpha(20)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    children: [
+                      Icon(Icons.info_outline, color: Colors.white.withAlpha(150), size: 18),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Video Info',
+                        style: TextStyle(
+                          color: Colors.white.withAlpha(200),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Info Grid
+                  Row(
+                    children: [
+                      // Duration
+                      Expanded(child: _buildInfoItem('⏱ Duration', durationStr)),
+                      // File Size
+                      Expanded(child: _buildInfoItem('📦 File Size', fileSize)),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      // Created Date
+                      Expanded(child: _buildInfoItem('📅 Created', createdDate)),
+                      // Voice
+                      Expanded(child: _buildInfoItem('🎙 Voice', voice)),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      // Style
+                      Expanded(child: _buildInfoItem('🎨 Style', style)),
+                      const Expanded(child: SizedBox()),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }
+          
+          /// Single info item in the card
+          Widget _buildInfoItem(String label, String value) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: Colors.white.withAlpha(100),
+                    fontSize: 11,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            );
+          }
+          
+          /// Compact action button
+          Widget _buildCompactButton({
+            required IconData icon,
+            required String label,
+            required Color color,
+            required VoidCallback onTap,
+          }) {
+            return GestureDetector(
+              onTap: onTap,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: color.withAlpha(20),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: color.withAlpha(50)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(icon, color: color, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        color: color,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           }
