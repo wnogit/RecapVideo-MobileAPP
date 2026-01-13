@@ -133,41 +133,93 @@ class _Step1InputWidgetState extends ConsumerState<Step1InputWidget> {
           ),
           const SizedBox(height: 8),
           Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              border: Border.all(color: Theme.of(context).dividerColor),
+              color: Colors.transparent, // No fill, like URL input
+              border: Border.all(color: const Color(0xFF3a3a4a)),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Theme(
-              data: Theme.of(context).copyWith(
-                canvasColor: Theme.of(context).cardColor,
+            child: DropdownButtonFormField<String>(
+              value: options.language,
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+                border: InputBorder.none,
+                filled: false,
               ),
-              child: DropdownButtonFormField<String>(
-                value: options.language,
-                decoration: const InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  border: InputBorder.none,
-                  prefixIcon: Text('🇲🇲 ', style: TextStyle(fontSize: 18)),
+              dropdownColor: const Color(0xFF1a1a2e),
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+              icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white54),
+              items: [
+                DropdownMenuItem(
+                  value: 'my', 
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2a2a3a),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text('🇲🇲', style: TextStyle(fontSize: 20)),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text('မြန်မာ (Burmese)', style: TextStyle(color: Colors.white)),
+                    ],
+                  ),
                 ),
-                dropdownColor: Theme.of(context).cardColor,
-                style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 14),
-                icon: Icon(Icons.keyboard_arrow_down, color: Theme.of(context).hintColor),
-                items: [
-                  DropdownMenuItem(
-                    value: 'my', 
-                    child: Text('မြန်မာ (Burmese)', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color))
+                DropdownMenuItem(
+                  value: 'en', 
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2a2a3a),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text('🇬🇧', style: TextStyle(fontSize: 20)),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text('English', style: TextStyle(color: Colors.white)),
+                    ],
                   ),
-                  DropdownMenuItem(
-                    value: 'en', 
-                    child: Text('English', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color))
-                  ),
-                ],
-                onChanged: (value) {
-                  if (value != null) {
-                    ref.read(videoCreationProvider.notifier).setLanguage(value);
-                  }
-                },
-              ),
+                ),
+              ],
+              selectedItemBuilder: (context) => [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2a2a3a),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text('🇲🇲', style: TextStyle(fontSize: 20)),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text('မြန်မာ (Burmese)', style: TextStyle(color: Colors.white, fontSize: 14)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2a2a3a),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text('🇬🇧', style: TextStyle(fontSize: 20)),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text('English', style: TextStyle(color: Colors.white, fontSize: 14)),
+                  ],
+                ),
+              ],
+              onChanged: (value) {
+                if (value != null) {
+                  ref.read(videoCreationProvider.notifier).setLanguage(value);
+                }
+              },
             ),
           ),
           const SizedBox(height: 8),
