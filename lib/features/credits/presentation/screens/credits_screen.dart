@@ -215,69 +215,74 @@ class CreditsScreen extends ConsumerWidget {
     required bool showLine,
     Widget? content,
   }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Left side: Circle + Line
-        Column(
-          children: [
-            // Step circle
-            Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isDone ? AppColors.success : isActive ? AppColors.primary : AppColors.surfaceVariant,
-              ),
-              child: Center(
-                child: isDone
-                    ? const Icon(Icons.check, color: Colors.white, size: 16)
-                    : Text('$stepNumber', style: TextStyle(
-                        color: isActive ? Colors.white : AppColors.textSecondary,
-                        fontWeight: FontWeight.bold, fontSize: 14,
-                      )),
-              ),
-            ),
-            // Vertical line (only if not last step)
-            if (showLine)
-              Container(
-                width: 2,
-                height: content != null ? null : 40, // Auto height when content exists
-                constraints: content != null ? const BoxConstraints(minHeight: 40) : null,
-                color: isDone ? AppColors.success : AppColors.surfaceVariant,
-                child: content != null ? IntrinsicHeight(child: Container(width: 2, color: isDone ? AppColors.success : AppColors.surfaceVariant)) : null,
-              ),
-          ],
-        ),
-        const SizedBox(width: 12),
-        // Right side: Title + Content
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Title
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: isActive || isDone ? Colors.white : AppColors.textSecondary,
-                    fontSize: 16,
-                    fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Left side: Circle + Line
+          SizedBox(
+            width: 28,
+            child: Column(
+              children: [
+                // Step circle
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isDone ? AppColors.primary : isActive ? AppColors.primary : AppColors.surfaceVariant,
+                  ),
+                  child: Center(
+                    child: isDone
+                        ? const Icon(Icons.check, color: Colors.white, size: 16)
+                        : Text('$stepNumber', style: TextStyle(
+                            color: isActive ? Colors.white : AppColors.textSecondary,
+                            fontWeight: FontWeight.bold, fontSize: 14,
+                          )),
                   ),
                 ),
-              ),
-              // Content
-              if (content != null) ...[
-                const SizedBox(height: 12),
-                content,
-                const SizedBox(height: 20),
-              ] else
-                const SizedBox(height: 20),
-            ],
+                // Vertical line - stretches to fill remaining height
+                if (showLine)
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      margin: const EdgeInsets.only(top: 4),
+                      color: isDone ? AppColors.primary : AppColors.surfaceVariant,
+                    ),
+                  ),
+              ],
+            ),
           ),
-        ),
-      ],
+          const SizedBox(width: 12),
+          // Right side: Title + Content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      color: isActive || isDone ? Colors.white : AppColors.textSecondary,
+                      fontSize: 16,
+                      fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                ),
+                // Content
+                if (content != null) ...[
+                  const SizedBox(height: 12),
+                  content,
+                  const SizedBox(height: 16),
+                ] else
+                  const SizedBox(height: 24),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
