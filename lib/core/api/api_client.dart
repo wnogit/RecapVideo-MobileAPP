@@ -1,6 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 
+/// SSL Pinning ဖွင့်/ပိတ် control
+/// TODO: Production မထုတ်ခင် SSL Pinning ထည့်ရန်။ 
+/// NOTE: Temporarily disabled - will add with proper conditional imports
+
 /// API Client using Dio
 class ApiClient {
   late final Dio _dio;
