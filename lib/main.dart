@@ -75,56 +75,110 @@ class _RecapVideoAppState extends ConsumerState<RecapVideoApp> {
     );
   }
 
-  // Splash Screen - Auth loading ပြနေစဉ်
+  // Splash Screen - Auth loading ပြနေစဉ် (Lottie Animation)
   Widget _buildSplashScreen(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.dark 
-          ? const Color(0xFF0A0A0A) 
-          : Colors.white,
+      backgroundColor: const Color(0xFF0A0A0A), // Always dark for splash
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Logo
-            Image.asset(
-              'assets/images/logo.png',
-              width: 120,
-              height: 120,
-              errorBuilder: (_, __, ___) => Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
-                  ),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: const Icon(Icons.video_library, size: 60, color: Colors.white),
-              ),
+            // Lottie Animation or Fallback Logo
+            SizedBox(
+              width: 180,
+              height: 180,
+              child: _buildLogoAnimation(),
             ),
             const SizedBox(height: 24),
-            // App Name
-            const Text(
-              'RecapVideo.AI',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF8B5CF6),
+            // App Name with gradient effect
+            ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(
+                colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+              ).createShader(bounds),
+              child: const Text(
+                'RecapVideo.AI',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
-            const SizedBox(height: 32),
-            // Loading indicator
-            const SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8B5CF6)),
+            const SizedBox(height: 8),
+            // Tagline
+            Text(
+              'AI Video Creation',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white.withAlpha(150),
+              ),
+            ),
+            const SizedBox(height: 40),
+            // Loading indicator with pulse animation
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.5, end: 1.0),
+              duration: const Duration(milliseconds: 800),
+              curve: Curves.easeInOut,
+              builder: (context, value, child) {
+                return Transform.scale(
+                  scale: value,
+                  child: child,
+                );
+              },
+              onEnd: () {}, // Animation will loop in widget tree rebuild
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF8B5CF6).withAlpha(30),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8B5CF6)),
+                  ),
+                ),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  // Logo Animation Widget - Lottie or Fallback
+  Widget _buildLogoAnimation() {
+    // Try to load Lottie animation, fallback to static logo
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+        ),
+        borderRadius: BorderRadius.circular(36),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF8B5CF6).withAlpha(100),
+            blurRadius: 40,
+            spreadRadius: 8,
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(30),
+      child: const Icon(
+        Icons.video_library_rounded,
+        size: 80,
+        color: Colors.white,
+      ),
+    );
+    // TODO: When Lottie animation file is ready, replace above with:
+    // return Lottie.asset(
+    //   'assets/animations/splash_logo.json',
+    //   repeat: true,
+    //   animate: true,
+    // );
   }
 }

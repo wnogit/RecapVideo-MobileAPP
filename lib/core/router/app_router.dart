@@ -33,14 +33,20 @@ class DeepLinkConfig {
 
 /// App Router Configuration with Auth Guards and Deep Links
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
+  // ref.watch အစား refreshListenable သုံးမယ် - LoginScreen rebuild မဖြစ်အောင်
+  final authChangeNotifier = ref.watch(authChangeNotifierProvider);
   
   return GoRouter(
     initialLocation: '/login',
     debugLogDiagnostics: true,
     
+    // Auth state ပြောင်းမှသာ redirect ပြန်စစ်မယ် (loading state ignore)
+    refreshListenable: authChangeNotifier,
+    
     // Route guards - redirect based on auth state
     redirect: (context, state) {
+      // ref.read သုံးမယ် - rebuild မဖြစ်အောင်
+      final authState = ref.read(authProvider);
       final isAuthenticated = authState.isAuthenticated;
       final isAuthRoute = state.matchedLocation == '/login' || 
                           state.matchedLocation == '/signup';

@@ -71,6 +71,17 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
     }
   }
 
+  /// Duration ကို mm:ss format ပြောင်းရန်
+  String _formatDuration(Duration duration) {
+    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    if (duration.inHours > 0) {
+      final hours = duration.inHours.toString();
+      return '$hours:$minutes:$seconds';
+    }
+    return '$minutes:$seconds';
+  }
+
   @override
   Widget build(BuildContext context) {
     final isReady = widget.status == 'completed' && widget.videoUrl != null;
@@ -94,7 +105,7 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
           // Video Player / Preview
           // Constrained height to avoid taking up full screen
           Container(
-            constraints: const BoxConstraints(maxHeight: 400),
+            constraints: const BoxConstraints(maxHeight: 450),
             child: AspectRatio(
               aspectRatio: _controller?.value.aspectRatio ?? 9 / 16,
               child: Container(
@@ -120,7 +131,17 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
                       else
                         _buildPlaceholder(),
 
-                      // Play overlay
+                      // Tap area for controls toggle
+                      if (_initialized)
+                        Positioned.fill(
+                          child: GestureDetector(
+                            onTap: _togglePlay,
+                            behavior: HitTestBehavior.translucent,
+                            child: const SizedBox(),
+                          ),
+                        ),
+
+                      // Play/Pause overlay (Center)
                       if (isReady)
                         Center(
                           child: GestureDetector(
@@ -144,15 +165,70 @@ class _VideoDetailScreenState extends ConsumerState<VideoDetailScreen> {
                           ),
                         ),
 
-                      // PLAY CONTROL CLICK AREA (Full screen tap if playing)
-                      if (_initialized)
-                         Positioned.fill(
-                           child: GestureDetector(
-                             onTap: _togglePlay,
-                             behavior: HitTestBehavior.translucent,
-                             child: const SizedBox(),
-                           ),
-                         ),
+                      // Video Controls (Bottom) - Progress bar + Duration
+                      if (_initialized && _controller != null)
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  Colors.black.withAlpha(180),
+                                  Colors.transparent,
+                                ],
+                              ),
+                            ),
+                            padding: const EdgeInsets.fromLTRB(12, 24, 12, 8),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Seek bar (Progress Indicator)
+                                VideoProgressIndicator(
+                                  _controller!,
+                                  allowScrubbing: true,
+                                  colors: const VideoProgressColors(
+                                    playedColor: AppColors.primary,
+                                    bufferedColor: Colors.white24,
+                                    backgroundColor: Colors.white10,
+                                  ),
+                                  padding: EdgeInsets.zero,
+                                ),
+                                const SizedBox(height: 6),
+                                // Duration labels
+                                ValueListenableBuilder<VideoPlayerValue>(
+                                  valueListenable: _controller!,
+                                  builder: (context, value, child) {
+                                    return Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        // Current position
+                                        Text(
+                                          _formatDuration(value.position),
+                                          style: const TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                        // Total duration
+                                        Text(
+                                          _formatDuration(value.duration),
+                                          style: const TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
 
                       // Status overlay for non-ready videos
                       if (!isReady)

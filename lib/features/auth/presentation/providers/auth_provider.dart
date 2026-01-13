@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/api/api_client.dart';
 import '../../../../core/models/user.dart';
@@ -220,4 +221,34 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   final apiClient = ref.watch(apiClientProvider);
   final tokenStorage = ref.watch(tokenStorageServiceProvider);
   return AuthNotifier(authRepository, apiClient, tokenStorage);
+});
+
+/// Auth Change Notifier - Router refreshListenable အတွက်
+/// isAuthenticated ပြောင်းမှသာ notify လုပ်မယ် (loading state ပြောင်းရင် ignore)
+class AuthChangeNotifier extends ChangeNotifier {
+  bool _wasAuthenticated = false;
+
+  void update(AuthState state) {
+    // isAuthenticated ပြောင်းမှသာ notify လုပ်မယ်
+    // loading true ဖြစ်နေရင် ignore (form rebuild မဖြစ်အောင်)
+    if (state.isLoading) return;
+    
+    final isNowAuthenticated = state.isAuthenticated;
+    if (_wasAuthenticated != isNowAuthenticated) {
+      _wasAuthenticated = isNowAuthenticated;
+      notifyListeners();
+    }
+  }
+}
+
+/// Auth Change Notifier Provider - GoRouter refreshListenable အတွက်
+final authChangeNotifierProvider = Provider<AuthChangeNotifier>((ref) {
+  final notifier = AuthChangeNotifier();
+  
+  // Auth state ပြောင်းတိုင်း update လုပ်မယ်
+  ref.listen<AuthState>(authProvider, (previous, next) {
+    notifier.update(next);
+  });
+  
+  return notifier;
 });
