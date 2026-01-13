@@ -3,6 +3,7 @@ import '../../../../core/api/api_client.dart';
 import '../../../../core/api/api_endpoints.dart';
 import '../../../../core/models/auth_response.dart';
 import '../../../../core/models/api_error.dart';
+import '../../../../core/models/user.dart';
 
 /// Auth Repository
 class AuthRepository {
@@ -78,12 +79,20 @@ class AuthRepository {
     }
   }
 
-  /// Get current user
-  Future<AuthResponse> getCurrentUser() async {
+  /// Get current user - /auth/me returns only user object
+  Future<User> getCurrentUser() async {
     try {
       final response = await _apiClient.get(ApiEndpoints.me);
-      return AuthResponse.fromJson(response.data as Map<String, dynamic>);
+      print('👤 Get Current User Response: ${response.data}');
+      
+      // /auth/me returns {user: {...}} or just {...}
+      final data = response.data as Map<String, dynamic>;
+      if (data.containsKey('user')) {
+        return User.fromJson(data['user'] as Map<String, dynamic>);
+      }
+      return User.fromJson(data);
     } on DioException catch (e) {
+      print('❌ Get Current User Error: ${e.message}');
       throw ApiError.fromDioError(e);
     }
   }

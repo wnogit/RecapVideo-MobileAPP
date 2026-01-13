@@ -74,35 +74,43 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Initialize - check for stored token and auto-login
   Future<void> initialize() async {
     state = state.copyWith(isLoading: true);
+    print('🚀 Auth Initialize started...');
 
     try {
       final token = await _tokenStorage.getAccessToken();
+      print('🔑 Stored token: ${token != null ? "exists (${token.length} chars)" : "null"}');
       
       if (token != null && token.isNotEmpty) {
         // Set token in API client
         _apiClient.setAuthToken(token);
         
-        // Get current user
-        final response = await _authRepository.getCurrentUser();
+        // Get current user - now returns User directly
+        final user = await _authRepository.getCurrentUser();
+        print('✅ Got user: ${user.email}');
         
         state = state.copyWith(
-          user: response.user,
+          user: user,
           token: token,
           isLoading: false,
           isInitialized: true, // Auth check ပြီးပြီ
         );
+        print('✅ Auth initialized - authenticated: ${state.isAuthenticated}');
       } else {
         // Token မရှိ - but initialized ပြီ
+        print('⚠️ No token found, going to login');
         state = state.copyWith(isLoading: false, isInitialized: true);
       }
     } on ApiError catch (e) {
+      print('❌ ApiError during init: ${e.message} (status: ${e.statusCode})');
       // Only clear if 401 Unauthorized
       if (e.statusCode == 401) {
         await _tokenStorage.clearAll();
       }
       state = state.copyWith(isLoading: false, isInitialized: true);
-    } catch (e) {
+    } catch (e, stackTrace) {
       // Network errors etc - still mark as initialized
+      print('❌ Exception during init: $e');
+      print('📍 Stack: $stackTrace');
       state = state.copyWith(isLoading: false, isInitialized: true);
     }
   }
