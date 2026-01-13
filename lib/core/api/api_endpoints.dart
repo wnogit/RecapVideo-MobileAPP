@@ -8,7 +8,9 @@ class ApiEndpoints {
   static const signup = '/auth/signup';
   static const googleSignIn = '/auth/google';
   static const refreshToken = '/auth/refresh';
-  static const me = '/auth/me';
+  
+  // User - /users/me endpoint (NOT /auth/me!)
+  static const me = '/users/me';
   
   // Videos
   static const videos = '/videos';
