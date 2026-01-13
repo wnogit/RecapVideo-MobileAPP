@@ -1,85 +1,88 @@
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// Token Storage Service - Uses SharedPreferences for reliability
-/// with FlutterSecureStorage as backup for sensitive data
+/// Token Storage Service - Fully Encrypted using FlutterSecureStorage
+/// 
+/// Uses:
+/// - Android: EncryptedSharedPreferences (AES encryption)
+/// - iOS: Keychain
 class TokenStorageService {
-  static const _secureStorage = FlutterSecureStorage();
+  // Android options for better reliability
+  static const _androidOptions = AndroidOptions(
+    encryptedSharedPreferences: true,
+    resetOnError: true, // Reset storage if corrupted
+  );
+  
+  static const _iosOptions = IOSOptions(
+    accessibility: KeychainAccessibility.first_unlock_this_device,
+  );
+  
+  static const _storage = FlutterSecureStorage(
+    aOptions: _androidOptions,
+    iOptions: _iosOptions,
+  );
   
   // Keys
-  static const String _accessTokenKey = 'auth_access_token';
-  static const String _refreshTokenKey = 'auth_refresh_token';
-  static const String _userIdKey = 'auth_user_id';
+  static const String _accessTokenKey = 'access_token';
+  static const String _refreshTokenKey = 'refresh_token';
+  static const String _userIdKey = 'user_id';
   
-  /// Save access token - uses SharedPreferences for reliability
+  /// Save access token (encrypted)
   Future<void> saveAccessToken(String token) async {
-    debugPrint('💾 Saving access token (${token.length} chars)');
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_accessTokenKey, token);
-    
-    // Also save to secure storage as backup
-    try {
-      await _secureStorage.write(key: _accessTokenKey, value: token);
-    } catch (e) {
-      debugPrint('⚠️ Secure storage backup failed: $e');
-    }
+    debugPrint('💾 Saving access token securely (${token.length} chars)');
+    await _storage.write(key: _accessTokenKey, value: token);
   }
   
   /// Get access token
   Future<String?> getAccessToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString(_accessTokenKey);
-    debugPrint('📖 Reading access token: ${token != null ? "found (${token.length} chars)" : "null"}');
-    
-    // If not in SharedPreferences, try secure storage (migration)
-    if (token == null || token.isEmpty) {
-      try {
-        final secureToken = await _secureStorage.read(key: _accessTokenKey);
-        if (secureToken != null && secureToken.isNotEmpty) {
-          debugPrint('📖 Found token in secure storage, migrating...');
-          await saveAccessToken(secureToken); // Migrate to SharedPreferences
-          return secureToken;
-        }
-      } catch (e) {
-        debugPrint('⚠️ Secure storage read failed: $e');
-      }
+    try {
+      final token = await _storage.read(key: _accessTokenKey);
+      debugPrint('📖 Reading access token: ${token != null ? "found (${token.length} chars)" : "null"}');
+      return token;
+    } catch (e) {
+      debugPrint('❌ Secure storage read error: $e');
+      // If storage is corrupted, clear and return null
+      await clearAll();
+      return null;
     }
-    
-    return token;
   }
   
   /// Save refresh token
   Future<void> saveRefreshToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_refreshTokenKey, token);
+    await _storage.write(key: _refreshTokenKey, value: token);
   }
   
   /// Get refresh token
   Future<String?> getRefreshToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_refreshTokenKey);
+    try {
+      return await _storage.read(key: _refreshTokenKey);
+    } catch (e) {
+      debugPrint('❌ Secure storage read error: $e');
+      return null;
+    }
   }
   
   /// Save user ID
   Future<void> saveUserId(String userId) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_userIdKey, userId);
+    await _storage.write(key: _userIdKey, value: userId);
   }
   
   /// Get user ID
   Future<String?> getUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_userIdKey);
+    try {
+      return await _storage.read(key: _userIdKey);
+    } catch (e) {
+      return null;
+    }
   }
   
-  /// Save all auth data
+  /// Save all auth data (encrypted)
   Future<void> saveAuthData({
     required String accessToken,
     String? refreshToken,
     String? userId,
   }) async {
-    debugPrint('💾 Saving all auth data...');
+    debugPrint('💾 Saving all auth data securely...');
     await saveAccessToken(accessToken);
     if (refreshToken != null) {
       await saveRefreshToken(refreshToken);
@@ -87,24 +90,18 @@ class TokenStorageService {
     if (userId != null) {
       await saveUserId(userId);
     }
-    debugPrint('✅ Auth data saved successfully');
+    debugPrint('✅ Auth data saved securely');
   }
   
   /// Clear all stored data
   Future<void> clearAll() async {
-    debugPrint('🗑️ Clearing all auth data...');
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_accessTokenKey);
-    await prefs.remove(_refreshTokenKey);
-    await prefs.remove(_userIdKey);
-    
-    // Also clear secure storage
+    debugPrint('🗑️ Clearing all secure auth data...');
     try {
-      await _secureStorage.deleteAll();
+      await _storage.deleteAll();
+      debugPrint('✅ Secure auth data cleared');
     } catch (e) {
-      debugPrint('⚠️ Secure storage clear failed: $e');
+      debugPrint('❌ Error clearing secure storage: $e');
     }
-    debugPrint('✅ Auth data cleared');
   }
   
   /// Check if user is logged in (has access token)
@@ -113,4 +110,5 @@ class TokenStorageService {
     return token != null && token.isNotEmpty;
   }
 }
+
 
