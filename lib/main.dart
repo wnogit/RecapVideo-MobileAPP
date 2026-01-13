@@ -20,21 +20,31 @@ class RecapVideoApp extends ConsumerStatefulWidget {
 }
 
 class _RecapVideoAppState extends ConsumerState<RecapVideoApp> {
-  // Auth initialization future - ပြီးမှ app စတင်မယ်
-  late Future<void> _authInitFuture;
+  // Auth initialization status - ပြီးမှ app စတင်မယ်
   bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    // Auth provider initialize - token စစ်ပြီး user data ယူမယ်
-    _authInitFuture = _initializeAuth();
+    // Frame ပြီးမှ auth initialize စမယ် (build cycle conflict မဖြစ်အောင်)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeAuth();
+    });
   }
 
   Future<void> _initializeAuth() async {
-    await ref.read(authProvider.notifier).initialize();
+    try {
+      await ref.read(authProvider.notifier).initialize();
+    } catch (e) {
+      debugPrint('Auth initialization error: $e');
+    }
+    // setState ခေါ်ခြင်း - addPostFrameCallback သုံးပြီး safe ဖြစ်အောင်
     if (mounted) {
-      setState(() => _isInitialized = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() => _isInitialized = true);
+        }
+      });
     }
   }
 
