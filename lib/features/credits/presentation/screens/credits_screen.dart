@@ -171,13 +171,23 @@ class CreditsScreen extends ConsumerWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 350),
+            duration: const Duration(milliseconds: 300),
             switchInCurve: Curves.easeOut,
             switchOutCurve: Curves.easeIn,
             transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
+              // Slide up animation
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.1), // Start from below
+                  end: Offset.zero,
+                ).animate(CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOut,
+                )),
+                child: FadeTransition(
+                  opacity: animation,
+                  child: child,
+                ),
               );
             },
             child: Column(
