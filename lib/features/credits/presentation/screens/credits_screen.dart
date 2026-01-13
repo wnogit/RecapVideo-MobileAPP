@@ -276,42 +276,56 @@ class CreditsScreen extends ConsumerWidget {
     required String title,
     required bool isActive,
     required bool isDone,
+    bool showLine = true,
   }) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isDone
-                ? AppColors.success
-                : isActive
-                    ? AppColors.primary
-                    : AppColors.surfaceVariant,
-          ),
-          child: Center(
-            child: isDone
-                ? const Icon(Icons.check, color: Colors.white, size: 16)
-                : Text(
-                    '$stepNumber',
-                    style: TextStyle(
-                      color: isActive ? Colors.white : AppColors.textSecondary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-          ),
+        Row(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isDone
+                    ? AppColors.success
+                    : isActive
+                        ? AppColors.primary
+                        : AppColors.surfaceVariant,
+              ),
+              child: Center(
+                child: isDone
+                    ? const Icon(Icons.check, color: Colors.white, size: 16)
+                    : Text(
+                        '$stepNumber',
+                        style: TextStyle(
+                          color: isActive ? Colors.white : AppColors.textSecondary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              title,
+              style: TextStyle(
+                color: isActive || isDone ? Colors.white : AppColors.textSecondary,
+                fontSize: 16,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 12),
-        Text(
-          title,
-          style: TextStyle(
-            color: isActive ? Colors.white : AppColors.textSecondary,
-            fontSize: 16,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+        // Vertical connecting line
+        if (showLine && !isActive)
+          Container(
+            margin: const EdgeInsets.only(left: 13),
+            width: 2,
+            height: 20,
+            color: isDone ? AppColors.success : AppColors.surfaceVariant,
           ),
-        ),
       ],
     );
   }
@@ -563,26 +577,35 @@ class CreditsScreen extends ConsumerWidget {
           const SizedBox(height: 16),
 
           // Transaction ID
-          const Text('Transaction ID (last 7 digits)', style: TextStyle(color: Colors.white, fontSize: 14)),
+          const Text('Transaction ID (last 7 digits)', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
           const SizedBox(height: 8),
           Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(24),
             ),
-            child: TextField(
-              keyboardType: TextInputType.number,
-              maxLength: 7,
-              style: const TextStyle(color: Colors.white, letterSpacing: 4),
-              decoration: InputDecoration(
-                counterText: '${state.transactionId.length}/7',
-                counterStyle: const TextStyle(color: AppColors.textSecondary),
-                hintText: '_ _ _ _ _ _ _',
-                hintStyle: const TextStyle(color: AppColors.textTertiary, letterSpacing: 8),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.all(16),
-              ),
-              onChanged: notifier.setTransactionId,
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    maxLength: 7,
+                    style: const TextStyle(color: Colors.white, letterSpacing: 6, fontSize: 16),
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(
+                      counterText: '',
+                      hintText: '- - - - - - -',
+                      hintStyle: TextStyle(color: AppColors.textTertiary.withOpacity(0.5), letterSpacing: 6),
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    onChanged: notifier.setTransactionId,
+                  ),
+                ),
+                Text('${state.transactionId.length}/7', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+              ],
             ),
           ),
           const SizedBox(height: 16),
@@ -682,7 +705,7 @@ class CreditsScreen extends ConsumerWidget {
     bool isLoading = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(left: 40),
+      padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Row(
         children: [
           if (showBack) ...[
