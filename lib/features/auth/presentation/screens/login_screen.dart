@@ -107,6 +107,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
+    // Error ရှိရင်ပဲ SnackBar ပြမယ်
+    // Success ရင် Router redirect ကပဲ handle မယ် (AuthChangeNotifier ကနေ)
     if (authState.error != null) {
       print('🔴 Showing error snackbar: ${authState.error!.message}');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -115,10 +117,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           backgroundColor: AppColors.error,
         ),
       );
-    } else if (authState.isAuthenticated) {
-      print('🟢 Navigating to /home');
-      context.go('/home');
-    } else {
+    } else if (!authState.isAuthenticated) {
+      // Neither error nor authenticated - something went wrong
       print('🟡 Neither error nor authenticated - something went wrong');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -127,6 +127,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
       );
     }
+    // Success case: Router redirect handles navigation automatically
+    // No manual context.go('/home') needed
   }
 
   Future<void> _handleGoogleSignIn() async {

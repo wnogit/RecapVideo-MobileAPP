@@ -234,28 +234,52 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
 });
 
 /// Auth Change Notifier - Router refreshListenable အတွက်
-/// isInitialized + isAuthenticated ပြောင်းမှသာ notify လုပ်မယ်
+/// Loading ပြီးမှ + isAuthenticated ပြောင်းမှသာ notify လုပ်မယ်
 class AuthChangeNotifier extends ChangeNotifier {
   bool _wasAuthenticated = false;
   bool _wasInitialized = false;
+  bool _wasLoading = false;
 
   void update(AuthState state) {
-    // Loading state ignore
-    if (state.isLoading) return;
+    // Loading အခြေအနေ track
+    final wasLoading = _wasLoading;
+    _wasLoading = state.isLoading;
     
-    // isInitialized ပြောင်းရင် notify (first time init)
-    if (!_wasInitialized && state.isInitialized) {
-      _wasInitialized = true;
-      _wasAuthenticated = state.isAuthenticated;
-      notifyListeners();
-      return;
+    // Loading ပြီးမှသာ state changes ကို check
+    if (wasLoading && !state.isLoading) {
+      // First time initialized
+      if (!_wasInitialized && state.isInitialized) {
+        _wasInitialized = true;
+        _wasAuthenticated = state.isAuthenticated;
+        notifyListeners();
+        return;
+      }
+      
+      // Auth state ပြောင်း (login/logout)
+      final isNowAuthenticated = state.isAuthenticated;
+      if (_wasAuthenticated != isNowAuthenticated) {
+        _wasAuthenticated = isNowAuthenticated;
+        notifyListeners();
+        return;
+      }
     }
     
-    // isAuthenticated ပြောင်းရင် notify (login/logout)
-    final isNowAuthenticated = state.isAuthenticated;
-    if (_wasAuthenticated != isNowAuthenticated) {
-      _wasAuthenticated = isNowAuthenticated;
-      notifyListeners();
+    // Not loading state - immediate check
+    if (!state.isLoading && !wasLoading) {
+      // isInitialized ပြောင်းရင် notify (first time init without loading)
+      if (!_wasInitialized && state.isInitialized) {
+        _wasInitialized = true;
+        _wasAuthenticated = state.isAuthenticated;
+        notifyListeners();
+        return;
+      }
+      
+      // isAuthenticated ပြောင်းရင် notify
+      final isNowAuthenticated = state.isAuthenticated;
+      if (_wasAuthenticated != isNowAuthenticated) {
+        _wasAuthenticated = isNowAuthenticated;
+        notifyListeners();
+      }
     }
   }
 }

@@ -20,9 +20,6 @@ class RecapVideoApp extends ConsumerStatefulWidget {
 }
 
 class _RecapVideoAppState extends ConsumerState<RecapVideoApp> {
-  // Auth initialization status - ပြီးမှ app စတင်မယ်
-  bool _isInitialized = false;
-
   @override
   void initState() {
     super.initState();
@@ -38,14 +35,7 @@ class _RecapVideoAppState extends ConsumerState<RecapVideoApp> {
     } catch (e) {
       debugPrint('Auth initialization error: $e');
     }
-    // setState ခေါ်ခြင်း - addPostFrameCallback သုံးပြီး safe ဖြစ်အောင်
-    if (mounted) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() => _isInitialized = true);
-        }
-      });
-    }
+    // AuthState.isInitialized ကိုပဲ သုံးမယ် - local state မလိုတော့ဘူး
   }
 
   @override
@@ -77,7 +67,8 @@ class _RecapVideoAppState extends ConsumerState<RecapVideoApp> {
       routerConfig: router,
       // Auth initialize မပြီးခင် splash screen ပြမယ်
       builder: (context, child) {
-        if (!_isInitialized) {
+        final authState = ref.watch(authProvider);
+        if (!authState.isInitialized) {
           return _buildSplashScreen(context);
         }
         return child ?? const SizedBox.shrink();
