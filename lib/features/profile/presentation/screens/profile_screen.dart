@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../../core/providers/theme_provider.dart';
-import '../../../../core/providers/language_provider.dart';
 
 /// Profile Screen - Redesigned to match web design
 class ProfileScreen extends ConsumerWidget {
@@ -14,16 +12,13 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final user = authState.user;
-    final currentTheme = ref.watch(themeProvider);
-    final currentLang = ref.watch(languageProvider);
-    final strings = ref.watch(stringsProvider);
     
     final userName = user?.name ?? 'User';
     final userEmail = user?.email ?? 'email@example.com';
     final userCredits = user?.credits ?? 0;
     final firstLetter = userName.isNotEmpty ? userName[0].toUpperCase() : 'U';
     final isPro = userCredits > 0;
-    final joinDate = 'Jan 2026'; // Could be from user.createdAt
+    final joinDate = 'Jan 2026';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -50,8 +45,8 @@ class ProfileScreen extends ConsumerWidget {
                         Container(
                           width: 70,
                           height: 70,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
                               colors: [Color(0xFF8B5CF6), Color(0xFF6B4CD4)],
                             ),
                             shape: BoxShape.circle,
@@ -163,9 +158,6 @@ class ProfileScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
 
-              // Quick Settings Section Removed
-              const SizedBox(height: 0),
-
               // Menu Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -201,13 +193,6 @@ class ProfileScreen extends ConsumerWidget {
                             iconColor: Colors.green,
                             label: 'Order History',
                             onTap: () {},
-                          ),
-                          _buildDivider(),
-                          _buildMenuItem(
-                            icon: Icons.settings,
-                            iconColor: Colors.grey,
-                            label: 'App Settings', // Renamed from strings.settings to avoid confusion
-                            onTap: () => context.push('/settings'),
                           ),
                           _buildDivider(),
                           _buildMenuItem(
@@ -255,24 +240,6 @@ class ProfileScreen extends ConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildThemeChip(WidgetRef ref, AppThemeMode mode, String emoji, AppThemeMode current) {
-    final isSelected = current == mode;
-    return GestureDetector(
-      onTap: () => ref.read(themeProvider.notifier).setTheme(mode),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withAlpha(40) : const Color(0xFF2D2D2D),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : const Color(0xFF444444),
-          ),
-        ),
-        child: Text(emoji, style: const TextStyle(fontSize: 14)),
       ),
     );
   }

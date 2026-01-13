@@ -277,7 +277,7 @@ class CreditsScreen extends ConsumerWidget {
                   content,
                   const SizedBox(height: 16),
                 ] else
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 40), // More space for collapsed steps
               ],
             ),
           ),
@@ -520,6 +520,8 @@ class CreditsScreen extends ConsumerWidget {
                   hintText: '- - - - - - -',
                   hintStyle: TextStyle(color: AppColors.textTertiary.withOpacity(0.5), letterSpacing: 4),
                   border: InputBorder.none, isDense: true, contentPadding: EdgeInsets.zero,
+                  filled: true,
+                  fillColor: Colors.transparent, // Override theme's fillColor
                 ),
                 onChanged: notifier.setTransactionId,
               ),

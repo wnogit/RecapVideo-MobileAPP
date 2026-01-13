@@ -7,14 +7,6 @@ import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/videos/presentation/screens/video_detail_screen.dart';
 import '../../features/credits/presentation/screens/order_history_screen.dart';
-import '../../features/settings/presentation/screens/settings_screen.dart';
-
-/// Settings wrapper to avoid circular dependency
-class _SettingsWrapper extends StatelessWidget {
-  const _SettingsWrapper();
-  @override
-  Widget build(BuildContext context) => const SettingsScreen();
-}
 
 /// Deep Link Configuration
 class DeepLinkConfig {
@@ -141,16 +133,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/credits',
         name: 'credits',
         builder: (context, state) => const MainNavigation(),
-      ),
-      
-      // Settings
-      GoRoute(
-        path: '/settings',
-        name: 'settings',
-        builder: (context, state) {
-          // Lazy import to avoid circular dependency
-          return const _SettingsWrapper();
-        },
       ),
     ],
     

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
-import 'core/providers/theme_provider.dart';
+import 'core/theme/app_theme.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 
 void main() {
@@ -35,35 +35,18 @@ class _RecapVideoAppState extends ConsumerState<RecapVideoApp> {
     } catch (e) {
       debugPrint('Auth initialization error: $e');
     }
-    // AuthState.isInitialized ကိုပဲ သုံးမယ် - local state မလိုတော့ဘူး
   }
 
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(appRouterProvider);
-    // Theme state ကို watch လုပ်မယ်
-    final currentTheme = ref.watch(themeProvider);
-    
-    // AppThemeMode ကနေ ThemeMode ပြောင်းမယ်
-    ThemeMode themeMode;
-    switch (currentTheme) {
-      case AppThemeMode.light:
-        themeMode = ThemeMode.light;
-        break;
-      case AppThemeMode.dark:
-        themeMode = ThemeMode.dark;
-        break;
-      case AppThemeMode.system:
-        themeMode = ThemeMode.system;
-        break;
-    }
     
     return MaterialApp.router(
       title: 'RecapVideo.ai',
       debugShowCheckedModeBanner: false,
-      theme: lightTheme,
-      darkTheme: darkTheme,
-      themeMode: themeMode,
+      theme: AppTheme.darkTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.dark, // Always dark mode
       routerConfig: router,
       // Auth initialize မပြီးခင် splash screen ပြမယ်
       builder: (context, child) {
@@ -79,7 +62,7 @@ class _RecapVideoAppState extends ConsumerState<RecapVideoApp> {
   // Splash Screen - Auth loading ပြနေစဉ် (Lottie Animation)
   Widget _buildSplashScreen(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A), // Always dark for splash
+      backgroundColor: const Color(0xFF0A0A0A),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -126,7 +109,7 @@ class _RecapVideoAppState extends ConsumerState<RecapVideoApp> {
                   child: child,
                 );
               },
-              onEnd: () {}, // Animation will loop in widget tree rebuild
+              onEnd: () {},
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
