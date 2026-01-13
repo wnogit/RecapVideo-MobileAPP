@@ -37,7 +37,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final authChangeNotifier = ref.watch(authChangeNotifierProvider);
   
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/', // Root location as starting point
     debugLogDiagnostics: true,
     
     // Auth state ပြောင်းမှသာ redirect ပြန်စစ်မယ် (loading state ignore)
@@ -55,16 +55,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
       
       final isAuthenticated = authState.isAuthenticated;
-      final isAuthRoute = state.matchedLocation == '/login' || 
-                          state.matchedLocation == '/signup';
+      final isLoginRoute = state.matchedLocation == '/login';
+      final isSignupRoute = state.matchedLocation == '/signup';
+      final isAuthRoute = isLoginRoute || isSignupRoute;
+      final isRootRoute = state.matchedLocation == '/';
       
-      // If not authenticated and trying to access protected route
-      if (!isAuthenticated && !isAuthRoute) {
+      // If not authenticated and trying to access protected route (or root)
+      if (!isAuthenticated && (!isAuthRoute || isRootRoute)) {
         return '/login';
       }
       
-      // If authenticated and trying to access auth routes
-      if (isAuthenticated && isAuthRoute) {
+      // If authenticated and trying to access auth routes (or root)
+      if (isAuthenticated && (isAuthRoute || isRootRoute)) {
         return '/home';
       }
       
@@ -72,6 +74,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     },
     
     routes: [
+      // Root Route (Placeholder for redirection)
+      GoRoute(
+        path: '/',
+        name: 'root',
+        builder: (context, state) => const SizedBox.shrink(),
+      ),
+
       // Auth Routes
       GoRoute(
         path: '/login',
