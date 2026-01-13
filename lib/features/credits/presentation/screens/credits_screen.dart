@@ -170,36 +170,54 @@ class CreditsScreen extends ConsumerWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              // Step 1
-              _buildStep(
-                stepNumber: 1,
-                title: 'Select Package',
-                isActive: state.currentStep == 0,
-                isDone: state.currentStep > 0,
-                showLine: true,
-                content: state.currentStep == 0 ? _buildStep1Content(context, state, notifier) : null,
-              ),
-              // Step 2
-              _buildStep(
-                stepNumber: 2,
-                title: 'Payment Method',
-                isActive: state.currentStep == 1,
-                isDone: state.currentStep > 1,
-                showLine: true,
-                content: state.currentStep == 1 ? _buildStep2Content(context, state, notifier) : null,
-              ),
-              // Step 3 (no line below)
-              _buildStep(
-                stepNumber: 3,
-                title: 'Confirmation',
-                isActive: state.currentStep == 2,
-                isDone: false,
-                showLine: false, // Last step, no line
-                content: state.currentStep == 2 ? _buildStep3Content(context, state, notifier, ref) : null,
-              ),
-            ],
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 350),
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.05),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              );
+            },
+            child: Column(
+              key: ValueKey<int>(state.currentStep), // Triggers animation on step change
+              children: [
+                // Step 1
+                _buildStep(
+                  stepNumber: 1,
+                  title: 'Select Package',
+                  isActive: state.currentStep == 0,
+                  isDone: state.currentStep > 0,
+                  showLine: true,
+                  content: state.currentStep == 0 ? _buildStep1Content(context, state, notifier) : null,
+                ),
+                // Step 2
+                _buildStep(
+                  stepNumber: 2,
+                  title: 'Payment Method',
+                  isActive: state.currentStep == 1,
+                  isDone: state.currentStep > 1,
+                  showLine: true,
+                  content: state.currentStep == 1 ? _buildStep2Content(context, state, notifier) : null,
+                ),
+                // Step 3 (no line below)
+                _buildStep(
+                  stepNumber: 3,
+                  title: 'Confirmation',
+                  isActive: state.currentStep == 2,
+                  isDone: false,
+                  showLine: false, // Last step, no line
+                  content: state.currentStep == 2 ? _buildStep3Content(context, state, notifier, ref) : null,
+                ),
+              ],
+            ),
           ),
         ),
       ),
