@@ -71,44 +71,76 @@ class AuthNotifier extends StateNotifier<AuthState> {
     this._tokenStorage,
   ) : super(const AuthState());
 
-  /// Initialize - check for stored token and auto-login
+  /// Initialize - OFFLINE-FIRST approach
+  /// 1. Load cached user data immediately (for instant home screen)
+  /// 2. Validate with server in background
+  /// 3. Network error = keep cached data, 401 = logout
   Future<void> initialize() async {
     state = state.copyWith(isLoading: true);
-    print('🚀 Auth Initialize started...');
+    print('🚀 Auth Initialize started (offline-first)...');
 
     try {
       final token = await _tokenStorage.getAccessToken();
       print('🔑 Stored token: ${token != null ? "exists (${token.length} chars)" : "null"}');
       
-      if (token != null && token.isNotEmpty) {
-        // Set token in API client
-        _apiClient.setAuthToken(token);
-        
-        // Get current user - now returns User directly
-        final user = await _authRepository.getCurrentUser();
-        print('✅ Got user: ${user.email}');
-        
-        state = state.copyWith(
-          user: user,
-          token: token,
-          isLoading: false,
-          isInitialized: true, // Auth check ပြီးပြီ
-        );
-        print('✅ Auth initialized - authenticated: ${state.isAuthenticated}');
-      } else {
-        // Token မရှိ - but initialized ပြီ
+      if (token == null || token.isEmpty) {
+        // No token - go to login
         print('⚠️ No token found, going to login');
         state = state.copyWith(isLoading: false, isInitialized: true);
+        return;
       }
-    } on ApiError catch (e) {
-      print('❌ ApiError during init: ${e.message} (status: ${e.statusCode})');
-      // Only clear if 401 Unauthorized
-      if (e.statusCode == 401) {
-        await _tokenStorage.clearAll();
+      
+      // Set token in API client
+      _apiClient.setAuthToken(token);
+      
+      // Step 1: Load cached user FIRST (for instant home screen)
+      final cachedUser = await _tokenStorage.getCachedUser();
+      if (cachedUser != null) {
+        print('✅ Loaded cached user: ${cachedUser.email}');
+        state = state.copyWith(
+          user: cachedUser,
+          token: token,
+          isLoading: false,
+          isInitialized: true,
+        );
+        print('✅ Auth initialized with cached data - authenticated: ${state.isAuthenticated}');
       }
-      state = state.copyWith(isLoading: false, isInitialized: true);
+      
+      // Step 2: Validate with server in background
+      try {
+        final freshUser = await _authRepository.getCurrentUser();
+        print('✅ Server validation success: ${freshUser.email}');
+        
+        // Update state and cache with fresh data
+        await _tokenStorage.saveUserData(freshUser);
+        state = state.copyWith(
+          user: freshUser,
+          token: token,
+          isLoading: false,
+          isInitialized: true,
+        );
+      } on ApiError catch (e) {
+        print('❌ ApiError during validation: ${e.message} (status: ${e.statusCode})');
+        if (e.statusCode == 401) {
+          // Token invalid - force logout
+          print('🔒 Token invalid (401) - forcing logout');
+          await _tokenStorage.clearAll();
+          state = const AuthState(isInitialized: true);
+        } else if (cachedUser == null) {
+          // No cached user and other API error
+          state = state.copyWith(isLoading: false, isInitialized: true);
+        }
+        // If cached user exists, keep using it
+      } catch (e) {
+        // Network error - keep using cached data if available
+        print('⚠️ Network error during validation: $e');
+        if (cachedUser == null) {
+          // No cached user - mark as initialized but not authenticated
+          state = state.copyWith(isLoading: false, isInitialized: true);
+        }
+        // If cached user exists, already set in state - keep it
+      }
     } catch (e, stackTrace) {
-      // Network errors etc - still mark as initialized
       print('❌ Exception during init: $e');
       print('📍 Stack: $stackTrace');
       state = state.copyWith(isLoading: false, isInitialized: true);
@@ -134,6 +166,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         refreshToken: response.refreshToken,
         userId: response.user.id,
       );
+      
+      // Cache user data for offline-first login
+      await _tokenStorage.saveUserData(response.user);
 
       state = state.copyWith(
         user: response.user,
@@ -176,6 +211,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         userId: response.user.id,
       );
 
+      // Cache user data for offline-first login
+      await _tokenStorage.saveUserData(response.user);
+
       state = state.copyWith(
         user: response.user,
         token: response.accessToken,
@@ -205,6 +243,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         refreshToken: response.refreshToken,
         userId: response.user.id,
       );
+
+      // Cache user data for offline-first login
+      await _tokenStorage.saveUserData(response.user);
 
       state = state.copyWith(
         user: response.user,

@@ -29,7 +29,7 @@ class User {
       'id': id,
       'email': email,
       'name': name,
-      'credits': credits,
+      'credit_balance': credits, // Match fromJson key
       'created_at': createdAt.toIso8601String(),
     };
   }

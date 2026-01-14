@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../models/user.dart';
 
 /// Token Storage Service - Fully Encrypted using FlutterSecureStorage
 /// 
@@ -26,6 +28,7 @@ class TokenStorageService {
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
   static const String _userIdKey = 'user_id';
+  static const String _userDataKey = 'cached_user_data'; // NEW: User cache
   
   /// Save access token (encrypted)
   Future<void> saveAccessToken(String token) async {
@@ -108,6 +111,49 @@ class TokenStorageService {
   Future<bool> hasAccessToken() async {
     final token = await getAccessToken();
     return token != null && token.isNotEmpty;
+  }
+  
+  // ===========================================
+  // User Data Caching (for offline-first login)
+  // ===========================================
+  
+  /// Save user data as JSON (for offline access)
+  Future<void> saveUserData(User user) async {
+    try {
+      final jsonString = jsonEncode(user.toJson());
+      await _storage.write(key: _userDataKey, value: jsonString);
+      debugPrint('💾 Cached user data: ${user.email}');
+    } catch (e) {
+      debugPrint('❌ Error caching user data: $e');
+    }
+  }
+  
+  /// Get cached user data (offline-first)
+  Future<User?> getCachedUser() async {
+    try {
+      final jsonString = await _storage.read(key: _userDataKey);
+      if (jsonString == null || jsonString.isEmpty) {
+        debugPrint('📖 No cached user data found');
+        return null;
+      }
+      final jsonMap = jsonDecode(jsonString) as Map<String, dynamic>;
+      final user = User.fromJson(jsonMap);
+      debugPrint('📖 Loaded cached user: ${user.email}');
+      return user;
+    } catch (e) {
+      debugPrint('❌ Error reading cached user: $e');
+      return null;
+    }
+  }
+  
+  /// Clear cached user data
+  Future<void> clearUserData() async {
+    try {
+      await _storage.delete(key: _userDataKey);
+      debugPrint('🗑️ Cleared cached user data');
+    } catch (e) {
+      debugPrint('❌ Error clearing cached user: $e');
+    }
   }
 }
 
