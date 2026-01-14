@@ -286,6 +286,20 @@ class _Step3BrandingWidgetState extends ConsumerState<Step3BrandingWidget> {
         ),
         const SizedBox(height: 16),
         
+        // Logo Size selector
+        Text('Logo အရွယ်အစား', style: TextStyle(fontSize: 12, color: Colors.white.withAlpha(150))),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _buildSizeChip('small', 'သေး', options.logoOptions.size),
+            const SizedBox(width: 8),
+            _buildSizeChip('medium', 'လတ်', options.logoOptions.size),
+            const SizedBox(width: 8),
+            _buildSizeChip('large', 'ကြီး', options.logoOptions.size),
+          ],
+        ),
+        const SizedBox(height: 16),
+        
         // Opacity slider - using int
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -336,6 +350,38 @@ class _Step3BrandingWidgetState extends ConsumerState<Step3BrandingWidget> {
               label,
               style: TextStyle(
                 fontSize: 11,
+                color: isSelected ? AppColors.primary : Colors.white70,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSizeChip(String size, String label, String current) {
+    final isSelected = current == size;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          final opts = ref.read(videoCreationProvider).options.logoOptions;
+          ref.read(videoCreationProvider.notifier).updateLogoOptions(
+            opts.copyWith(size: size),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary.withAlpha(30) : const Color(0xFF2D2D2D),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: isSelected ? AppColors.primary : const Color(0xFF444444)),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
                 color: isSelected ? AppColors.primary : Colors.white70,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),

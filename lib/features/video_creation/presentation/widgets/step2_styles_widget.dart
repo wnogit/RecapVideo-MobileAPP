@@ -272,48 +272,37 @@ class _Step2StylesWidgetState extends ConsumerState<Step2StylesWidget> {
           ),
         ),
         if (options.blurRegions.isNotEmpty) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           ...options.blurRegions.map<Widget>((region) {
             final index = options.blurRegions.indexOf(region);
             return Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
                 color: const Color(0xFF2D2D2D),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: const Color(0xFF444444)),
               ),
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       color: Colors.blue.withAlpha(30),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                    child: const Icon(Icons.blur_linear, size: 18, color: Colors.blue),
+                    child: const Icon(Icons.blur_linear, size: 14, color: Colors.blue),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Blur Region ${index + 1}',
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-                        ),
-                        Text(
-                          'Position: (${region.x.toInt()}, ${region.y.toInt()})',
-                          style: TextStyle(fontSize: 11, color: Colors.white.withAlpha(120)),
-                        ),
-                      ],
+                    child: Text(
+                      'Box ${index + 1} (${region.x.toInt()}%, ${region.y.toInt()}%)',
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => ref.read(videoCreationProvider.notifier).removeBlurRegion(region.id),
-                    icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                    constraints: const BoxConstraints(),
-                    padding: EdgeInsets.zero,
+                  GestureDetector(
+                    onTap: () => ref.read(videoCreationProvider.notifier).removeBlurRegion(region.id),
+                    child: const Icon(Icons.delete_outline, color: Colors.red, size: 18),
                   ),
                 ],
               ),

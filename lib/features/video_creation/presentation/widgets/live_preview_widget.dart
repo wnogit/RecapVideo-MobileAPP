@@ -162,8 +162,8 @@ class LivePreviewWidget extends ConsumerWidget {
                             child: Opacity(
                               opacity: options.logoOptions.opacity / 100,
                               child: Container(
-                                width: 32,
-                                height: 32,
+                                width: _getLogoSize(options.logoOptions.size),
+                                height: _getLogoSize(options.logoOptions.size),
                                 decoration: BoxDecoration(
                                   color: Colors.white24,
                                   borderRadius: BorderRadius.circular(4),
@@ -186,6 +186,24 @@ class LivePreviewWidget extends ConsumerWidget {
                               ),
                             ),
                           ),
+
+                        // Blur regions overlay
+                        ...options.blurRegions.map((blur) => Positioned(
+                          left: (blur.x / 100) * dimensions.width,
+                          top: (blur.y / 100) * dimensions.height,
+                          child: Container(
+                            width: (blur.width / 100) * dimensions.width,
+                            height: (blur.height / 100) * dimensions.height,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withAlpha(100),
+                              border: Border.all(color: Colors.red, width: 1.5),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Center(
+                              child: Icon(Icons.blur_on, size: 12, color: Colors.red),
+                            ),
+                          ),
+                        )),
 
                         // Voice indicator - smaller
                         Positioned(
@@ -330,6 +348,14 @@ class LivePreviewWidget extends ConsumerWidget {
       case 'small': return 6;
       case 'large': return 9;
       default: return 7;
+    }
+  }
+
+  double _getLogoSize(String size) {
+    switch (size) {
+      case 'small': return 24;
+      case 'large': return 48;
+      default: return 32; // medium
     }
   }
 
