@@ -7,6 +7,8 @@ import '../widgets/live_preview_widget.dart';
 import '../widgets/step1_input_widget.dart';
 import '../widgets/step2_styles_widget.dart';
 import '../widgets/step3_branding_widget.dart';
+import '../widgets/processing_view_widget.dart';
+import '../widgets/complete_view_widget.dart';
 
 /// Create Video Screen - Full page scrollable with compact preview
 class CreateVideoScreen extends ConsumerWidget {
@@ -22,6 +24,35 @@ class CreateVideoScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(videoCreationProvider);
     final currentStep = state.currentStep;
+    
+    // Show Processing View
+    if (state.isProcessing) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: ProcessingViewWidget(
+            progress: state.processingProgress,
+            currentStatus: state.processingStatus.name,
+            onCancel: () => ref.read(videoCreationProvider.notifier).cancelProcessing(),
+          ),
+        ),
+      );
+    }
+    
+    // Show Complete View
+    if (state.isComplete) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: CompleteViewWidget(
+            title: state.completedVideoTitle ?? 'Video Created',
+            duration: '~2:30',
+            appliedFeatures: _getAppliedFeatures(state.options),
+            onCreateAnother: () => ref.read(videoCreationProvider.notifier).resetAfterComplete(),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -310,6 +341,20 @@ class CreateVideoScreen extends ConsumerWidget {
       default:
         return const Step1InputWidget();
     }
+  }
+  
+  /// Get list of applied features for Complete View
+  List<String> _getAppliedFeatures(dynamic options) {
+    final features = <String>[];
+    if (options.subtitleOptions.enabled) features.add('Subtitles enabled');
+    if (options.logoOptions.enabled) features.add('Logo added');
+    if (options.outroOptions.enabled) features.add('Outro added');
+    if (options.copyrightOptions.colorAdjust) features.add('Color adjustment');
+    if (options.copyrightOptions.horizontalFlip) features.add('Horizontal flip');
+    if (options.copyrightOptions.audioPitchShift) features.add('Audio pitch shift');
+    if (options.copyrightOptions.slightZoom) features.add('Slight zoom');
+    if (options.blurRegions.isNotEmpty) features.add('Blur regions (${options.blurRegions.length})');
+    return features;
   }
 }
 

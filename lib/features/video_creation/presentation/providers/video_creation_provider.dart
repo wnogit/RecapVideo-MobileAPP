@@ -2,18 +2,44 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/video_creation_options.dart';
 import '../../../../core/api/video_service.dart';
 
+/// Processing Status enum
+enum ProcessingStatus {
+  pending,
+  extracting,
+  generatingScript,
+  generatingAudio,
+  rendering,
+  uploading,
+  complete,
+  failed,
+}
+
 /// Video Creation State
 class VideoCreationState {
   final int currentStep;
   final VideoCreationOptions options;
   final bool isSubmitting;
   final String? error;
+  
+  // Processing state
+  final bool isProcessing;
+  final bool isComplete;
+  final int processingProgress; // 0-100
+  final ProcessingStatus processingStatus;
+  final String? completedVideoUrl;
+  final String? completedVideoTitle;
 
   const VideoCreationState({
     this.currentStep = 1,
     this.options = const VideoCreationOptions(),
     this.isSubmitting = false,
     this.error,
+    this.isProcessing = false,
+    this.isComplete = false,
+    this.processingProgress = 0,
+    this.processingStatus = ProcessingStatus.pending,
+    this.completedVideoUrl,
+    this.completedVideoTitle,
   });
 
   VideoCreationState copyWith({
@@ -21,12 +47,24 @@ class VideoCreationState {
     VideoCreationOptions? options,
     bool? isSubmitting,
     String? error,
+    bool? isProcessing,
+    bool? isComplete,
+    int? processingProgress,
+    ProcessingStatus? processingStatus,
+    String? completedVideoUrl,
+    String? completedVideoTitle,
   }) {
     return VideoCreationState(
       currentStep: currentStep ?? this.currentStep,
       options: options ?? this.options,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       error: error,
+      isProcessing: isProcessing ?? this.isProcessing,
+      isComplete: isComplete ?? this.isComplete,
+      processingProgress: processingProgress ?? this.processingProgress,
+      processingStatus: processingStatus ?? this.processingStatus,
+      completedVideoUrl: completedVideoUrl ?? this.completedVideoUrl,
+      completedVideoTitle: completedVideoTitle ?? this.completedVideoTitle,
     );
   }
 
@@ -203,11 +241,23 @@ class VideoCreationNotifier extends StateNotifier<VideoCreationState> {
     state = const VideoCreationState();
   }
 
-  // Submit - Connected to API
+  // Submit - Start processing with UI feedback
   Future<bool> submit() async {
-    state = state.copyWith(isSubmitting: true, error: null);
+    state = state.copyWith(
+      isSubmitting: true, 
+      isProcessing: true,
+      processingProgress: 0,
+      processingStatus: ProcessingStatus.pending,
+      error: null,
+    );
+    
     try {
       final options = state.options;
+      
+      // Simulate processing steps for UI feedback
+      await _simulateProcessing();
+      
+      // Call actual API
       await _videoService.createVideo(CreateVideoRequest(
         sourceUrl: options.sourceUrl,
         voiceId: options.voiceId,
@@ -231,7 +281,7 @@ class VideoCreationNotifier extends StateNotifier<VideoCreationState> {
           'position': options.logoOptions.position,
           'size': options.logoOptions.size,
           'opacity': options.logoOptions.opacity,
-          'file_path': options.logoOptions.localFilePath, // Pass path to service
+          'file_path': options.logoOptions.localFilePath,
         } : null,
         outroOptions: options.outroOptions.enabled ? {
           'enabled': true,
@@ -241,13 +291,60 @@ class VideoCreationNotifier extends StateNotifier<VideoCreationState> {
         } : null,
       ));
       
-      // Success - reset form
-      reset();
+      // Success - show complete view
+      state = state.copyWith(
+        isSubmitting: false,
+        isProcessing: false,
+        isComplete: true,
+        processingProgress: 100,
+        processingStatus: ProcessingStatus.complete,
+        completedVideoTitle: 'Video Created Successfully',
+      );
       return true;
     } catch (e) {
-      state = state.copyWith(error: e.toString(), isSubmitting: false);
+      state = state.copyWith(
+        error: e.toString(), 
+        isSubmitting: false,
+        isProcessing: false,
+        processingStatus: ProcessingStatus.failed,
+      );
       return false;
     }
+  }
+  
+  /// Simulate processing steps for UI feedback
+  Future<void> _simulateProcessing() async {
+    final steps = [
+      (ProcessingStatus.extracting, 15),
+      (ProcessingStatus.generatingScript, 35),
+      (ProcessingStatus.generatingAudio, 55),
+      (ProcessingStatus.rendering, 75),
+      (ProcessingStatus.uploading, 90),
+    ];
+    
+    for (final step in steps) {
+      await Future.delayed(const Duration(milliseconds: 800));
+      if (!state.isProcessing) return; // Cancelled
+      state = state.copyWith(
+        processingStatus: step.$1,
+        processingProgress: step.$2,
+      );
+    }
+  }
+  
+  /// Cancel processing
+  void cancelProcessing() {
+    state = state.copyWith(
+      isSubmitting: false,
+      isProcessing: false,
+      processingProgress: 0,
+      processingStatus: ProcessingStatus.pending,
+    );
+  }
+  
+  /// Reset after complete - go back to step 1
+  void resetAfterComplete() {
+    state = const VideoCreationState();
   }
 }
 
