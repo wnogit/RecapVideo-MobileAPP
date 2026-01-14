@@ -256,23 +256,25 @@ class _Step2StylesWidgetState extends ConsumerState<Step2StylesWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Add blur button
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: () => ref.read(videoCreationProvider.notifier).addBlurRegion(),
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('Blur Region ထည့်ရန်'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              side: const BorderSide(color: AppColors.primary),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-          ),
+        // Position preset buttons (like web)
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            _buildBlurPresetButton('+ ညာအောက်ထောင့်', 'bottom-right'),
+            _buildBlurPresetButton('+ ဘယ်အောက်ထောင့်', 'bottom-left'),
+            _buildBlurPresetButton('+ ညာအပေါ်ထောင့်', 'top-right'),
+            _buildBlurPresetButton('+ Custom', 'custom'),
+          ],
         ),
+        
         if (options.blurRegions.isNotEmpty) ...[
           const SizedBox(height: 12),
+          Text(
+            'Blur Regions (${options.blurRegions.length})',
+            style: TextStyle(fontSize: 11, color: Colors.white.withAlpha(120)),
+          ),
+          const SizedBox(height: 8),
           ...options.blurRegions.map<Widget>((region) {
             final index = options.blurRegions.indexOf(region);
             return Container(
@@ -308,14 +310,72 @@ class _Step2StylesWidgetState extends ConsumerState<Step2StylesWidget> {
               ),
             );
           }).toList(),
+          
+          // Blur Intensity Slider
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2D2D2D),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFF444444)),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Blur Intensity', style: TextStyle(fontSize: 12, color: Colors.white.withAlpha(150))),
+                    Text(
+                      '${options.blurIntensity}',
+                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+                Slider(
+                  value: options.blurIntensity.toDouble(),
+                  min: 5,
+                  max: 30,
+                  divisions: 25,
+                  activeColor: AppColors.primary,
+                  onChanged: (v) => ref.read(videoCreationProvider.notifier).setBlurIntensity(v.toInt()),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('အနည်းငယ်', style: TextStyle(fontSize: 10, color: Colors.white.withAlpha(80))),
+                    Text('အလွန်များ', style: TextStyle(fontSize: 10, color: Colors.white.withAlpha(80))),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ] else ...[
           const SizedBox(height: 12),
           Text(
-            'Blur region များ မထည့်ရသေးပါ',
-            style: TextStyle(fontSize: 12, color: Colors.white.withAlpha(100)),
+            '💡 YouTube watermark, logo ကို ဖုံးဖို့ blur box ထည့်ပါ',
+            style: TextStyle(fontSize: 11, color: Colors.white.withAlpha(100)),
           ),
         ],
       ],
+    );
+  }
+  
+  Widget _buildBlurPresetButton(String label, String position) {
+    return GestureDetector(
+      onTap: () => ref.read(videoCreationProvider.notifier).addBlurAtPosition(position),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2D2D2D),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppColors.primary.withAlpha(80)),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(fontSize: 11, color: AppColors.primary),
+        ),
+      ),
     );
   }
 

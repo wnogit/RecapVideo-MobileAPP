@@ -9,6 +9,7 @@ class VideoCreationOptions {
   final LogoOptions logoOptions;
   final OutroOptions outroOptions;
   final List<BlurRegion> blurRegions;
+  final int blurIntensity; // 5-30
 
   const VideoCreationOptions({
     this.sourceUrl = '',
@@ -20,6 +21,7 @@ class VideoCreationOptions {
     this.logoOptions = const LogoOptions(),
     this.outroOptions = const OutroOptions(),
     this.blurRegions = const [],
+    this.blurIntensity = 15,
   });
 
   VideoCreationOptions copyWith({
@@ -32,6 +34,7 @@ class VideoCreationOptions {
     LogoOptions? logoOptions,
     OutroOptions? outroOptions,
     List<BlurRegion>? blurRegions,
+    int? blurIntensity,
   }) {
     return VideoCreationOptions(
       sourceUrl: sourceUrl ?? this.sourceUrl,
@@ -43,6 +46,7 @@ class VideoCreationOptions {
       logoOptions: logoOptions ?? this.logoOptions,
       outroOptions: outroOptions ?? this.outroOptions,
       blurRegions: blurRegions ?? this.blurRegions,
+      blurIntensity: blurIntensity ?? this.blurIntensity,
     );
   }
 

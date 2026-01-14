@@ -210,8 +210,36 @@ class VideoCreationNotifier extends StateNotifier<VideoCreationState> {
 
   // Blur Regions
   void addBlurRegion() {
+    addBlurAtPosition('custom');
+  }
+  
+  /// Add blur at preset position
+  void addBlurAtPosition(String position) {
+    double x = 30, y = 45, width = 40, height = 10;
+    
+    switch (position) {
+      case 'top-left':
+        x = 2; y = 2; width = 25; height = 8;
+        break;
+      case 'top-right':
+        x = 73; y = 2; width = 25; height = 8;
+        break;
+      case 'bottom-left':
+        x = 2; y = 88; width = 30; height = 10;
+        break;
+      case 'bottom-right':
+        x = 68; y = 88; width = 30; height = 10;
+        break;
+      case 'custom':
+      default:
+        x = 30; y = 45; width = 40; height = 10;
+    }
+    
     final regions = List<BlurRegion>.from(state.options.blurRegions);
-    regions.add(BlurRegion(id: DateTime.now().millisecondsSinceEpoch.toString()));
+    regions.add(BlurRegion(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      x: x, y: y, width: width, height: height,
+    ));
     state = state.copyWith(
       options: state.options.copyWith(blurRegions: regions),
     );
@@ -233,6 +261,12 @@ class VideoCreationNotifier extends StateNotifier<VideoCreationState> {
     }).toList();
     state = state.copyWith(
       options: state.options.copyWith(blurRegions: regions),
+    );
+  }
+  
+  void setBlurIntensity(int intensity) {
+    state = state.copyWith(
+      options: state.options.copyWith(blurIntensity: intensity),
     );
   }
 
