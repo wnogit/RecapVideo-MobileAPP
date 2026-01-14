@@ -17,13 +17,12 @@ class ApiEndpoints {
   static String videoDetail(String id) => '/videos/$id';
   static String videoStatus(String id) => '/videos/$id/status';
   
-  // Credits
+  // Credits & Transactions
   static const packages = '/packages';
+  static const transactions = '/credits/transactions';  // Fixed: was /users/me/transactions
+  
+  // Orders
   static const orders = '/orders';
   static String orderDetail(String id) => '/orders/$id';
   static String uploadPaymentScreenshot(String id) => '/orders/$id/upload';
-  
-  // User
-  static const user = '/users/me';
-  static const transactions = '/users/me/transactions';
 }
