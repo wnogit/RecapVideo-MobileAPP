@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import 'order_history_screen.dart';
+import 'transaction_history_screen.dart';
 
 /// Profile Screen - Redesigned to match web design
 class ProfileScreen extends ConsumerWidget {
@@ -193,6 +195,7 @@ class ProfileScreen extends ConsumerWidget {
                       child: Column(
                         children: [
                           _buildMenuItem(
+                            context: context,
                             icon: Icons.video_library,
                             iconColor: Colors.purple,
                             label: 'My Videos',
@@ -200,13 +203,29 @@ class ProfileScreen extends ConsumerWidget {
                           ),
                           _buildDivider(),
                           _buildMenuItem(
+                            context: context,
                             icon: Icons.history,
                             iconColor: Colors.green,
                             label: 'Order History',
-                            onTap: () {},
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const OrderHistoryScreen()),
+                            ),
                           ),
                           _buildDivider(),
                           _buildMenuItem(
+                            context: context,
+                            icon: Icons.swap_horiz,
+                            iconColor: Colors.blue,
+                            label: 'Transaction History',
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const TransactionHistoryScreen()),
+                            ),
+                          ),
+                          _buildDivider(),
+                          _buildMenuItem(
+                            context: context,
                             icon: Icons.help_outline,
                             iconColor: Colors.cyan,
                             label: 'Help & Support',
@@ -256,6 +275,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildMenuItem({
+    required BuildContext context,
     required IconData icon,
     required Color iconColor,
     required String label,

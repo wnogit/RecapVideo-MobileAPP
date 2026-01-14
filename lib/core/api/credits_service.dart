@@ -146,6 +146,61 @@ class CreditsService {
       throw Exception('Failed to fetch orders: $e');
     }
   }
+  
+  /// Get transaction history
+  Future<List<Transaction>> getTransactions() async {
+    try {
+      final response = await _client.get(ApiEndpoints.transactions);
+      final List<dynamic> data = response.data['data'] ?? response.data ?? [];
+      return data.map((json) => Transaction.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch transactions: $e');
+    }
+  }
+}
+
+/// Transaction model for credit history
+class Transaction {
+  final String id;
+  final String transactionType; // purchase, usage, bonus, refund
+  final int amount;
+  final int balanceAfter;
+  final String? description;
+  final DateTime createdAt;
+
+  Transaction({
+    required this.id,
+    required this.transactionType,
+    required this.amount,
+    required this.balanceAfter,
+    this.description,
+    required this.createdAt,
+  });
+
+  factory Transaction.fromJson(Map<String, dynamic> json) {
+    return Transaction(
+      id: json['id'] ?? '',
+      transactionType: json['transaction_type'] ?? 'usage',
+      amount: json['amount'] ?? 0,
+      balanceAfter: json['balance_after'] ?? 0,
+      description: json['description'],
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'])
+          : DateTime.now(),
+    );
+  }
+  
+  String get typeLabel {
+    switch (transactionType) {
+      case 'purchase': return 'Credit Purchase';
+      case 'usage': return 'Video Creation';
+      case 'bonus': return 'Bonus Credits';
+      case 'refund': return 'Refund';
+      default: return transactionType;
+    }
+  }
+  
+  bool get isPositive => amount > 0;
 }
 
 /// Provider for credits service
