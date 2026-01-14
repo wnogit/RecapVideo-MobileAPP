@@ -96,26 +96,37 @@ class ProfileScreen extends ConsumerWidget {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: isPro 
-                                      ? AppColors.primary.withAlpha(30) 
-                                      : const Color(0xFF333333),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: isPro ? AppColors.primary : const Color(0xFF555555),
+                              if (isPro)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)],
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text('Pro', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white)),
+                                      SizedBox(width: 2),
+                                      Text('⚡', style: TextStyle(fontSize: 10)),
+                                    ],
+                                  ),
+                                )
+                              else
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF333333),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: const Color(0xFF555555)),
+                                  ),
+                                  child: const Text(
+                                    'Free',
+                                    style: TextStyle(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.w500),
                                   ),
                                 ),
-                                child: Text(
-                                  isPro ? 'Pro' : 'Free',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: isPro ? AppColors.primary : Colors.white70,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                           const SizedBox(height: 4),

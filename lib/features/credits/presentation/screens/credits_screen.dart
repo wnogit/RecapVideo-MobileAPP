@@ -170,8 +170,15 @@ class CreditsScreen extends ConsumerWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: child,
+            ),
+            child: Column(
+              key: ValueKey<int>(state.currentStep),
+              children: [
                 // Step 1
                 _buildStep(
                   stepNumber: 1,
@@ -196,11 +203,12 @@ class CreditsScreen extends ConsumerWidget {
                   title: 'Confirmation',
                   isActive: state.currentStep == 2,
                   isDone: false,
-                  showLine: false, // Last step, no line
+                  showLine: false,
                   content: state.currentStep == 2 ? _buildStep3Content(context, state, notifier, ref) : null,
                 ),
               ],
             ),
+          ),
         ),
       ),
     );
@@ -271,21 +279,13 @@ class CreditsScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                // Content with collapse animation
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  child: content != null
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 12),
-                            content,
-                            const SizedBox(height: 16),
-                          ],
-                        )
-                      : const SizedBox(height: 20), // Collapsed state
-                ),
+                // Content - simple, no animation
+                if (content != null) ...[
+                  const SizedBox(height: 12),
+                  content,
+                  const SizedBox(height: 24),
+                ] else
+                  const SizedBox(height: 32), // Space between collapsed steps
               ],
             ),
           ),
