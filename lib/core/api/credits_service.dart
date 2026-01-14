@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'api_client.dart';
 import 'api_endpoints.dart';
+import '../providers/api_provider.dart';  // Use shared authenticated client
 
 /// Credit Package model
 class CreditPackage {
@@ -203,13 +204,8 @@ class Transaction {
   bool get isPositive => amount > 0;
 }
 
-/// Provider for credits service
+/// Provider for credits service - uses shared authenticated apiClientProvider
 final creditsServiceProvider = Provider<CreditsService>((ref) {
   final client = ref.watch(apiClientProvider);
   return CreditsService(client);
-});
-
-/// Need to import apiClientProvider
-final apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient();
 });
