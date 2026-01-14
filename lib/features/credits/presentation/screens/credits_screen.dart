@@ -170,44 +170,36 @@ class CreditsScreen extends ConsumerWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            transitionBuilder: (child, animation) => FadeTransition(
-              opacity: animation,
-              child: child,
-            ),
-            child: Column(
-              key: ValueKey<int>(state.currentStep),
-              children: [
-                // Step 1
-                _buildStep(
-                  stepNumber: 1,
-                  title: 'Select Package',
-                  isActive: state.currentStep == 0,
-                  isDone: state.currentStep > 0,
-                  showLine: true,
-                  content: state.currentStep == 0 ? _buildStep1Content(context, state, notifier) : null,
-                ),
-                // Step 2
-                _buildStep(
-                  stepNumber: 2,
-                  title: 'Payment Method',
-                  isActive: state.currentStep == 1,
-                  isDone: state.currentStep > 1,
-                  showLine: true,
-                  content: state.currentStep == 1 ? _buildStep2Content(context, state, notifier) : null,
-                ),
-                // Step 3 (no line below)
-                _buildStep(
-                  stepNumber: 3,
-                  title: 'Confirmation',
-                  isActive: state.currentStep == 2,
-                  isDone: false,
-                  showLine: false,
-                  content: state.currentStep == 2 ? _buildStep3Content(context, state, notifier, ref) : null,
-                ),
-              ],
-            ),
+          child: Column(
+            children: [
+              // Step 1
+              _buildStep(
+                stepNumber: 1,
+                title: 'Select Package',
+                isActive: state.currentStep == 0,
+                isDone: state.currentStep > 0,
+                showLine: true,
+                content: state.currentStep == 0 ? _buildStep1Content(context, state, notifier) : null,
+              ),
+              // Step 2
+              _buildStep(
+                stepNumber: 2,
+                title: 'Payment Method',
+                isActive: state.currentStep == 1,
+                isDone: state.currentStep > 1,
+                showLine: true,
+                content: state.currentStep == 1 ? _buildStep2Content(context, state, notifier) : null,
+              ),
+              // Step 3 (no line below)
+              _buildStep(
+                stepNumber: 3,
+                title: 'Confirmation',
+                isActive: state.currentStep == 2,
+                isDone: false,
+                showLine: false,
+                content: state.currentStep == 2 ? _buildStep3Content(context, state, notifier, ref) : null,
+              ),
+            ],
           ),
         ),
       ),
@@ -279,13 +271,22 @@ class CreditsScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                // Content - simple, no animation
-                if (content != null) ...[
-                  const SizedBox(height: 12),
-                  content,
-                  const SizedBox(height: 24),
-                ] else
-                  const SizedBox(height: 32), // Space between collapsed steps
+                // Content with AnimatedCrossFade (like Step2 Styles)
+                AnimatedCrossFade(
+                  firstChild: const SizedBox(height: 32, width: double.infinity), // Collapsed
+                  secondChild: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 12),
+                      if (content != null) content,
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                  crossFadeState: content != null
+                      ? CrossFadeState.showSecond
+                      : CrossFadeState.showFirst,
+                  duration: const Duration(milliseconds: 200),
+                ),
               ],
             ),
           ),
