@@ -187,20 +187,62 @@ class LivePreviewWidget extends ConsumerWidget {
                             ),
                           ),
 
-                        // Blur regions overlay
+                        // Blur regions overlay - Draggable
                         ...options.blurRegions.map((blur) => Positioned(
                           left: (blur.x / 100) * dimensions.width,
                           top: (blur.y / 100) * dimensions.height,
-                          child: Container(
-                            width: (blur.width / 100) * dimensions.width,
-                            height: (blur.height / 100) * dimensions.height,
-                            decoration: BoxDecoration(
-                              color: Colors.black.withAlpha(100),
-                              border: Border.all(color: Colors.red, width: 1.5),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Center(
-                              child: Icon(Icons.blur_on, size: 12, color: Colors.red),
+                          child: GestureDetector(
+                            onPanUpdate: (details) {
+                              // Calculate new position as percentage
+                              final newX = blur.x + (details.delta.dx / dimensions.width) * 100;
+                              final newY = blur.y + (details.delta.dy / dimensions.height) * 100;
+                              // Clamp to bounds
+                              final clampedX = newX.clamp(0.0, 100.0 - blur.width);
+                              final clampedY = newY.clamp(0.0, 100.0 - blur.height);
+                              ref.read(videoCreationProvider.notifier).updateBlurRegion(
+                                blur.id, x: clampedX, y: clampedY,
+                              );
+                            },
+                            child: Container(
+                              width: (blur.width / 100) * dimensions.width,
+                              height: (blur.height / 100) * dimensions.height,
+                              decoration: BoxDecoration(
+                                color: Colors.black.withAlpha(100),
+                                border: Border.all(color: Colors.red, width: 1.5),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Stack(
+                                children: [
+                                  const Center(
+                                    child: Icon(Icons.blur_on, size: 12, color: Colors.red),
+                                  ),
+                                  // Resize handle at bottom-right
+                                  Positioned(
+                                    right: 0,
+                                    bottom: 0,
+                                    child: GestureDetector(
+                                      onPanUpdate: (details) {
+                                        final newWidth = blur.width + (details.delta.dx / dimensions.width) * 100;
+                                        final newHeight = blur.height + (details.delta.dy / dimensions.height) * 100;
+                                        ref.read(videoCreationProvider.notifier).updateBlurRegion(
+                                          blur.id,
+                                          width: newWidth.clamp(5.0, 100.0 - blur.x),
+                                          height: newHeight.clamp(3.0, 100.0 - blur.y),
+                                        );
+                                      },
+                                      child: Container(
+                                        width: 12,
+                                        height: 12,
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          borderRadius: BorderRadius.circular(2),
+                                        ),
+                                        child: const Icon(Icons.open_in_full, size: 8, color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         )),

@@ -390,10 +390,8 @@ class _Step2StylesWidgetState extends ConsumerState<Step2StylesWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'တည်နေရာ',
-          style: TextStyle(fontSize: 12, color: Colors.white.withAlpha(150)),
-        ),
+        // Position
+        Text('တည်နေရာ', style: TextStyle(fontSize: 12, color: Colors.white.withAlpha(150))),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -405,10 +403,9 @@ class _Step2StylesWidgetState extends ConsumerState<Step2StylesWidget> {
           ],
         ),
         const SizedBox(height: 16),
-        Text(
-          'အရွယ်အစား',
-          style: TextStyle(fontSize: 12, color: Colors.white.withAlpha(150)),
-        ),
+        
+        // Size
+        Text('အရွယ်အစား', style: TextStyle(fontSize: 12, color: Colors.white.withAlpha(150))),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -419,7 +416,97 @@ class _Step2StylesWidgetState extends ConsumerState<Step2StylesWidget> {
             _buildSizeChip('large', 'ကြီး'),
           ],
         ),
+        const SizedBox(height: 16),
+        
+        // Background Style (new)
+        Text('နောက်ခံ Style', style: TextStyle(fontSize: 12, color: Colors.white.withAlpha(150))),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _buildBackgroundChip('none', 'မရှိ', options.subtitleOptions.background),
+            const SizedBox(width: 8),
+            _buildBackgroundChip('semi', 'Glass', options.subtitleOptions.background),
+            const SizedBox(width: 8),
+            _buildBackgroundChip('solid', 'အပြည့်', options.subtitleOptions.background),
+          ],
+        ),
+        const SizedBox(height: 16),
+        
+        // Text Color (new)
+        Text('စာသား အရောင်', style: TextStyle(fontSize: 12, color: Colors.white.withAlpha(150))),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            _buildColorChip('#FFFFFF', Colors.white, options.subtitleOptions.color),
+            _buildColorChip('#FFFF00', Colors.yellow, options.subtitleOptions.color),
+            _buildColorChip('#00FF00', Colors.green, options.subtitleOptions.color),
+            _buildColorChip('#00FFFF', Colors.cyan, options.subtitleOptions.color),
+            _buildColorChip('#FF6B6B', Colors.red.shade300, options.subtitleOptions.color),
+            _buildColorChip('#A855F7', const Color(0xFFA855F7), options.subtitleOptions.color),
+          ],
+        ),
       ],
+    );
+  }
+  
+  Widget _buildBackgroundChip(String value, String label, String current) {
+    final isSelected = current == value;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          final opts = ref.read(videoCreationProvider).options.subtitleOptions;
+          ref.read(videoCreationProvider.notifier).updateSubtitleOptions(
+            opts.copyWith(background: value),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary.withAlpha(30) : const Color(0xFF2D2D2D),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: isSelected ? AppColors.primary : const Color(0xFF444444)),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                color: isSelected ? AppColors.primary : Colors.white70,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildColorChip(String hexColor, Color color, String current) {
+    final isSelected = current == hexColor;
+    return GestureDetector(
+      onTap: () {
+        final opts = ref.read(videoCreationProvider).options.subtitleOptions;
+        ref.read(videoCreationProvider.notifier).updateSubtitleOptions(
+          opts.copyWith(color: hexColor),
+        );
+      },
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : Colors.white24,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: isSelected
+            ? const Center(child: Icon(Icons.check, size: 16, color: Colors.black))
+            : null,
+      ),
     );
   }
 
