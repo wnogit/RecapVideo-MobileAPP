@@ -271,22 +271,13 @@ class CreditsScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                // Content with AnimatedCrossFade (like Step2 Styles)
-                AnimatedCrossFade(
-                  firstChild: const SizedBox(height: 32, width: double.infinity), // Collapsed
-                  secondChild: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 12),
-                      if (content != null) content,
-                      const SizedBox(height: 24),
-                    ],
-                  ),
-                  crossFadeState: content != null
-                      ? CrossFadeState.showSecond
-                      : CrossFadeState.showFirst,
-                  duration: const Duration(milliseconds: 200),
-                ),
+                // Content - simple display (no overflow)
+                if (content != null) ...[
+                  const SizedBox(height: 12),
+                  content,
+                  const SizedBox(height: 24),
+                ] else
+                  const SizedBox(height: 32),
               ],
             ),
           ),
